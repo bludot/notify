@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:notify/model/push_notification.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:flutter_notification_channel/flutter_notification_channel.dart';
+import 'package:flutter_notification_channel/notification_importance.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
@@ -39,9 +41,18 @@ class _HomePageState extends State<HomePage> {
   PushNotification? _notificationInfo;
 
   void registerNotification() async {
+    var result = await FlutterNotificationChannel.registerNotificationChannel(
+      description: 'My test channel',
+      id: 'com.softmaestri.testchannel',
+      importance: NotificationImportance.IMPORTANCE_HIGH,
+      name: 'Flutter channel test name',
+    );
     await Firebase.initializeApp();
     _messaging = FirebaseMessaging.instance;
 
+    _messaging.getToken().then((token) {
+      print(token);
+    });
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     NotificationSettings settings = await _messaging.requestPermission(
